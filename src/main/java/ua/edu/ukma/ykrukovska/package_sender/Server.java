@@ -13,24 +13,28 @@ public class Server {
         return byteBuffer.array();
     }
 
-    private byte[] turnMessageToByteArray(Message message) {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(8 + message.getMessage().length());
+    private byte[] convertMessageToByteArray(Message message) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(8 + message.size());
         byteBuffer.putInt(message.getType());
         byteBuffer.putInt(message.getUserId());
-        for (byte b : message.getMessage().getBytes()) {
-            byteBuffer.put(b);
+
+        for (byte decryptedMessageByte :  message.getEncryptedMessage()) {
+            byteBuffer.put(decryptedMessageByte);
         }
+
         return byteBuffer.array();
     }
 
     private byte[] convertPackageToBytes(Package pack) {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(18 + pack.getLen());
+
+        byte[] encryptedMessage = convertMessageToByteArray(pack.getMsq());
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(18 + encryptedMessage.length);
         for (byte b : getPackageHeaderBytes(pack)) {
             byteBuffer.put(b);
         }
         byteBuffer.putShort(pack.getCrc16_1());
-
-        for (byte b : turnMessageToByteArray(pack.getMsq())) {
+        for (byte b : encryptedMessage) {
             byteBuffer.put(b);
         }
         byteBuffer.putShort(pack.getCrc16_2());

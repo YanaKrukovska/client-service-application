@@ -1,15 +1,17 @@
 package ua.edu.ukma.ykrukovska.package_sender;
 
+import java.nio.ByteBuffer;
+
 public class Package {
 
     private final byte magic = 0xD;
+    private static long messageId = 1;
     private byte src;
     private long pktId;
     private int len;
     private short crc16_1;
     private Message msq;
     private short crc16_2;
-
 
     public byte getMagic() {
         return magic;
@@ -39,30 +41,25 @@ public class Package {
         return crc16_2;
     }
 
-    /*
-    public static void main(String[] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
-        String encryptionKeyString = "thisisa128bitkey";
-        String originalMessage = "This is a secret message";
-        byte[] encryptionKeyBytes = encryptionKeyString.getBytes();
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        SecretKey secretKey = new SecretKeySpec(encryptionKeyBytes, "AES");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        byte[] encryptedMessageBytes = cipher.doFinal(originalMessage.getBytes());
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
-        byte[] decryptedMessageBytes = cipher.doFinal(encryptedMessageBytes);
-        System.out.println(new String(decryptedMessageBytes));
-
-    }*/
-
     public Package(PackageBuilder packageBuilder) {
         this.src = packageBuilder.src;
         this.pktId = packageBuilder.pktId;
         this.len = packageBuilder.len;
-        this.crc16_1 = packageBuilder.crc16_1;
         this.msq = packageBuilder.msq;
-        this.crc16_2 = packageBuilder.crc16_2;
+        byte[] headerBytes = calculateHeaderBytes();
+        this.crc16_1 = CRC16.getCRC(headerBytes);
+        this.crc16_2 = CRC16.getCRC(msq.getMessage());
     }
 
+
+    private byte[] calculateHeaderBytes() {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(14);
+        byteBuffer.put(magic);
+        byteBuffer.put(src);
+        byteBuffer.putLong(pktId);
+        byteBuffer.putInt(len);
+        return byteBuffer.array();
+    }
 
     @Override
     public String toString() {
@@ -92,6 +89,11 @@ public class Package {
             return this;
         }
 
+        public PackageBuilder pktId() {
+            this.pktId = messageId++;
+            return this;
+        }
+
         public PackageBuilder pktId(long pktId) {
             this.pktId = pktId;
             return this;
@@ -105,6 +107,7 @@ public class Package {
         public PackageBuilder crc16_1(short crc16_1) {
             this.crc16_1 = crc16_1;
             return this;
+
         }
 
         public PackageBuilder crc16_2(short crc16_2) {

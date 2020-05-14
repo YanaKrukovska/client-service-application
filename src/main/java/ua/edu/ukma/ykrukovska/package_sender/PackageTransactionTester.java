@@ -6,12 +6,15 @@ public class PackageTransactionTester {
         Client client = new Client();
         Server server = new Server();
 
-        Package packageStart = new Package.PackageBuilder().pktId(5).len(16).msq(new Message.MessageBuilder().type(3).userId(4).message("Rita").build()).build();
+        Message message = new Message.MessageBuilder().type(3).userId(4).message("Rita").build();
+        Package packageStart = new Package.PackageBuilder().pktId().len(message.size()).msq(message).build();
+        Package packageStart1 = new Package.PackageBuilder().pktId().len(message.size()).msq(message).build();
 
         byte[] sent = server.sendPackage(packageStart);
         Package packageResult = client.receivePackage(sent);
 
         System.out.println(packageStart.toString());
+       // System.out.println(packageStart1.toString());
         System.out.println(packageResult.toString());
 
 

@@ -10,12 +10,34 @@ public class Message {
     private int type;
     private int userId;
     private String message;
-
+    private byte[] encryptedMessage;
 
     public Message(MessageBuilder builder) {
         this.type = builder.type;
         this.userId = builder.userId;
         this.message = builder.message;
+        this.encryptedMessage = encryptMessage(this);
+    }
+
+    public byte[] encryptMessage(Message message) {
+
+        Cipher cipher = null;
+        byte[] encryptedMessageBytes = new byte[0];
+        try {
+            cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            String encryptionKeyString = "thisisa128bitkey";
+            byte[] encryptionKeyBytes = encryptionKeyString.getBytes();
+            SecretKey secretKey = new SecretKeySpec(encryptionKeyBytes, "AES");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            encryptedMessageBytes = cipher.doFinal(message.getMessage().getBytes());
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {
+            e.printStackTrace();
+        }
+        return encryptedMessageBytes;
+    }
+
+    public int size() {
+        return 8 + encryptedMessage.length;
     }
 
     public int getType() {
@@ -28,6 +50,10 @@ public class Message {
 
     public String getMessage() {
         return message;
+    }
+
+    public byte[] getEncryptedMessage() {
+        return encryptedMessage;
     }
 
     @Override
@@ -56,19 +82,6 @@ public class Message {
         }
 
         public MessageBuilder message(String message) {
-            try {
-                Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-                String encryptionKeyString = "thisisa128bitkey";
-                byte[] encryptionKeyBytes = encryptionKeyString.getBytes();
-                SecretKey secretKey = new SecretKeySpec(encryptionKeyBytes, "AES");
-                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-                byte[] encryptedMessageBytes = cipher.doFinal(message.getBytes());
-                cipher.init(Cipher.DECRYPT_MODE, secretKey);
-                byte[] decryptedMessageBytes = cipher.doFinal(encryptedMessageBytes);
-            } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException e) {
-                e.printStackTrace();
-            }
-
             this.message = message;
             return this;
         }
