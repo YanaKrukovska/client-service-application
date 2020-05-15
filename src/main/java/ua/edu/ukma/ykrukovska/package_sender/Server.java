@@ -4,10 +4,20 @@ import java.nio.ByteBuffer;
 
 public class Server {
 
+    private byte clientId;
+
+    public Server(int clientId) {
+        this.clientId = (byte) clientId;
+    }
+
+    public byte getClientId() {
+        return clientId;
+    }
+
     private byte[] getPackageHeaderBytes(Package pack) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(14);
         byteBuffer.put(pack.getMagic());
-        byteBuffer.put(pack.getSrc());
+        byteBuffer.put(clientId);
         byteBuffer.putLong(pack.getPktId());
         byteBuffer.putInt(pack.getLen());
         return byteBuffer.array();
@@ -18,7 +28,7 @@ public class Server {
         byteBuffer.putInt(message.getType());
         byteBuffer.putInt(message.getUserId());
 
-        for (byte decryptedMessageByte :  message.getEncryptedMessage()) {
+        for (byte decryptedMessageByte : message.getEncryptedMessage()) {
             byteBuffer.put(decryptedMessageByte);
         }
 

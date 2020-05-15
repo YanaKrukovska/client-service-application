@@ -47,7 +47,7 @@ public class Client {
         byte[] headerBytes = Arrays.copyOfRange(receivedPackage, 0, 14);
         short crc1 = ByteBuffer.wrap(receivedPackage, 14, 2).getShort();
         if (crc1 != CRC16.getCRC(headerBytes)) {
-            throw new IllegalArgumentException("Wrong crc1, actual = " + CRC16.getCRC(headerBytes) + ", found = " + crc1);
+            throw new IllegalArgumentException("Wrong crc1");
         }
 
         byte[] byteMessage = Arrays.copyOfRange(receivedPackage, 16, 16 + len);
@@ -55,7 +55,7 @@ public class Client {
         short crc2 = ByteBuffer.wrap(receivedPackage, 16 + len + 8, 2).getShort();
 
         if (crc2 != CRC16.getCRC(msg.getMessage())) {
-            throw new IllegalArgumentException("Wrong crc2, actual = " + CRC16.getCRC(msg.getMessage()) + ", found = " + crc2);
+            throw new IllegalArgumentException("Wrong crc2");
         }
 
 

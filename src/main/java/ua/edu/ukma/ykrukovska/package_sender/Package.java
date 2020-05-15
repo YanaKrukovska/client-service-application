@@ -62,6 +62,36 @@ public class Package {
     }
 
     @Override
+    public boolean equals(Object obj) {
+
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof Package)) {
+            return false;
+        }
+
+        Package other = (Package) obj;
+
+        if (this.src != other.src) {
+            return false;
+        }
+        if (this.len != other.len) {
+            return false;
+        }
+        if (this.pktId != other.pktId) {
+            return false;
+        }
+        if (this.crc16_1 != other.crc16_1) {
+            return false;
+        }
+        if (this.crc16_2 != other.crc16_2) {
+            return false;
+        }
+        return this.msq.equals(other.msq);
+    }
+
+    @Override
     public String toString() {
         return "Package: " + "magic = " + magic +
                 ", src = " + src +

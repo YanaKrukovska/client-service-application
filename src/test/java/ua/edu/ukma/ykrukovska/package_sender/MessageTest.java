@@ -1,36 +1,38 @@
 package ua.edu.ukma.ykrukovska.package_sender;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 class MessageTest {
 
+
     @Test
-    void encryptSimpleMessage() {
-        Message message = new Message.MessageBuilder().type(1).userId(2).message("Rita").build();
-        byte[] encryptedMessage = message.encryptMessage(message);
-        Assertions.assertEquals(new String(Client.decryptMessage(encryptedMessage)), message.getMessage());
+    void compareMessagesSame() {
+        Message message1 = new Message.MessageBuilder().type(1).userId(2).message("Rita").build();
+        Message message2 = new Message.MessageBuilder().type(1).userId(2).message("Rita").build();
+        assertThat(message1).isEqualTo(message2);
     }
 
     @Test
-    void encryptLongMessage() {
-        Message message = new Message.MessageBuilder().type(1).userId(2).message("Rita is my cat").build();
-        byte[] encryptedMessage = message.encryptMessage(message);
-        Assertions.assertEquals(new String(Client.decryptMessage(encryptedMessage)), message.getMessage());
+    void compareMessagesDifferentText() {
+        Message message1 = new Message.MessageBuilder().type(3).userId(4).message("Rita").build();
+        Message message2 = new Message.MessageBuilder().type(3).userId(4).message("Rita!").build();
+        assertThat(message1).isNotEqualTo(message2);
     }
 
     @Test
-    void encryptMessageWithNumbers() {
-        Message message = new Message.MessageBuilder().type(1).userId(2).message("Rita is 15 years old").build();
-        byte[] encryptedMessage = message.encryptMessage(message);
-        Assertions.assertEquals(new String(Client.decryptMessage(encryptedMessage)), message.getMessage());
+    void compareMessagesDifferentType() {
+        Message message1 = new Message.MessageBuilder().type(2).userId(4).message("Meow").build();
+        Message message2 = new Message.MessageBuilder().type(8).userId(4).message("Meow").build();
+        assertThat(message1).isNotEqualTo(message2);
     }
 
     @Test
-    void encryptMessageWithSymbols() {
-        Message message = new Message.MessageBuilder().type(1).userId(2).message("Rita is 15 years old!").build();
-        byte[] encryptedMessage = message.encryptMessage(message);
-        Assertions.assertEquals(new String(Client.decryptMessage(encryptedMessage)), message.getMessage());
+    void compareMessagesDifferentUserId() {
+        Message message1 = new Message.MessageBuilder().type(1).userId(1).message("Meow!").build();
+        Message message2 = new Message.MessageBuilder().type(1).userId(8).message("Meow!").build();
+        assertThat(message1).isNotEqualTo(message2);
     }
 
 }

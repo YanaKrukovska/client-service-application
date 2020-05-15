@@ -57,6 +57,28 @@ public class Message {
     }
 
     @Override
+    public boolean equals(Object obj) {
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (!(obj instanceof Message)) {
+            return false;
+        }
+
+      Message other = (Message) obj;
+
+        if (this.type != other.type) {
+            return false;
+        }
+        if (this.userId != other.userId) {
+            return false;
+        }
+        return this.message.equals(other.message);
+    }
+
+    @Override
     public String toString() {
         return "Message (" + "type = " + type +
                 ", userId = " + userId +
