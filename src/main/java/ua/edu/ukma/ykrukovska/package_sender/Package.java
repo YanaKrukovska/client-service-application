@@ -46,20 +46,10 @@ public class Package {
         this.pktId = packageBuilder.pktId;
         this.len = packageBuilder.len;
         this.msq = packageBuilder.msq;
-        byte[] headerBytes = calculateHeaderBytes();
-        this.crc16_1 = CRC16.getCRC(headerBytes);
-        this.crc16_2 = CRC16.getCRC(msq.getMessage());
+        this.crc16_1 = packageBuilder.crc16_1;
+        this.crc16_2 = packageBuilder.crc16_2;
     }
 
-
-    private byte[] calculateHeaderBytes() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(14);
-        byteBuffer.put(magic);
-        byteBuffer.put(src);
-        byteBuffer.putLong(pktId);
-        byteBuffer.putInt(len);
-        return byteBuffer.array();
-    }
 
     @Override
     public boolean equals(Object obj) {
@@ -114,6 +104,15 @@ public class Package {
         public PackageBuilder() {
         }
 
+        private byte[] calculateHeaderBytes() {
+            ByteBuffer byteBuffer = ByteBuffer.allocate(14);
+            byteBuffer.put((byte) 0xD);
+            byteBuffer.put(src);
+            byteBuffer.putLong(pktId);
+            byteBuffer.putInt(len);
+            return byteBuffer.array();
+        }
+
         public PackageBuilder src(byte src) {
             this.src = src;
             return this;
@@ -134,10 +133,21 @@ public class Package {
             return this;
         }
 
+        public PackageBuilder crc16_1() {
+            this.crc16_1 = CRC16.getCRC(calculateHeaderBytes());
+            return this;
+
+        }
+
         public PackageBuilder crc16_1(short crc16_1) {
             this.crc16_1 = crc16_1;
             return this;
 
+        }
+
+        public PackageBuilder crc16_2() {
+            this.crc16_2 = CRC16.getCRC(msq.getMessage());
+            return this;
         }
 
         public PackageBuilder crc16_2(short crc16_2) {
