@@ -1,4 +1,4 @@
-package ua.edu.ukma.ykrukovska.package_sender;
+package ua.edu.ukma.ykrukovska.practice1;
 
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
