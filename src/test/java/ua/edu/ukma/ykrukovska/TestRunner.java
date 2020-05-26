@@ -1,15 +1,21 @@
-package ua.edu.ukma.ykrukovska.practice2;
+package ua.edu.ukma.ykrukovska;
 
+import org.junit.jupiter.api.Test;
+import ua.edu.ukma.ykrukovska.practice2.WatchCat;
 import ua.edu.ukma.ykrukovska.practice2.channel.Channel;
 import ua.edu.ukma.ykrukovska.practice2.channel.ConcurrentChannel;
 import ua.edu.ukma.ykrukovska.practice2.domain.DomainObject;
 import ua.edu.ukma.ykrukovska.practice2.messages.*;
 import ua.edu.ukma.ykrukovska.practice2.processor.*;
 
-public class DemoApplication {
+public class TestRunner {
+
+    /*Due to JUnit implementation it terminates threads before they are finished. To see
+    * the proper work of the following code please check DemoApplication*/
 
 
-    public static void main(String[] args) throws InterruptedException {
+    @Test
+    void runApplication() throws InterruptedException {
         Channel<Message> inbound = new ConcurrentChannel<>();
 
         FakeMessageService<Message> messageGenerator = new FakeMessageService<>(inbound, new MessageCreatorImpl());
@@ -50,5 +56,7 @@ public class DemoApplication {
 
         Thread monitorChannels = new Thread(watchCat);
         monitorChannels.start();
+
     }
+
 }

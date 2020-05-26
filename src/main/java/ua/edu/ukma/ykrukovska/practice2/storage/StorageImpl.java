@@ -1,4 +1,4 @@
-package ua.edu.ukma.ykrukovska.practice2;
+package ua.edu.ukma.ykrukovska.practice2.storage;
 
 import java.util.*;
 

@@ -24,5 +24,9 @@ public abstract class AbstractDataProcessingService<I, O> {
     public void startProcessing() {
         workers.forEach(Thread::start);
     }
+
+    public void stopProcessing() {
+        workers.forEach(Thread::interrupt);
+    }
 }
 

@@ -20,7 +20,7 @@ public class FakeMessageService<Message> extends AbstractMessageGenerator<Messag
             for (int i = 0; i < messageCount; i++) {
                 outboundChannel.submit(creator.create());
             }
-            out.println("Generated messages :" + messageCount);
+            out.println("Generated messages: " + messageCount);
         } else {
 
                 new Thread(() -> {
@@ -32,7 +32,7 @@ public class FakeMessageService<Message> extends AbstractMessageGenerator<Messag
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        out.println("Generated message :" + message.toString());
+                        out.println("Generated message: " + message.toString());
                     }
                 }).start();
 

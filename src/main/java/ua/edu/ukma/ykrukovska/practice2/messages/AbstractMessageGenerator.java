@@ -4,13 +4,12 @@ import ua.edu.ukma.ykrukovska.practice2.channel.Channel;
 
 public abstract class AbstractMessageGenerator<T> {
     protected final Channel<T> outboundChannel;
-    private final static int DEFAULT_MESSAGE_AMOUNT = 1;
+    private final static int DEFAULT_MESSAGE_AMOUNT = 20;
     protected final int messageCount;
     protected final boolean infiniteGeneration;
     protected boolean stopGeneration = false;
 
-
-    public AbstractMessageGenerator(Channel<T> outboundChannel, int messageCount, boolean infiniteGeneration) {
+    private AbstractMessageGenerator(Channel<T> outboundChannel, int messageCount, boolean infiniteGeneration) {
         this.outboundChannel = outboundChannel;
         this.messageCount = messageCount;
         this.infiniteGeneration = infiniteGeneration;
