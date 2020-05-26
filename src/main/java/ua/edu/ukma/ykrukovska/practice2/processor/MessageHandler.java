@@ -15,7 +15,9 @@ public class MessageHandler extends AbstractDataProcessingService<DomainObject, 
     @Override
     protected void initWorkers() {
         for (int i = 0; i < workerAmount; i++) {
-            workers.add(new Thread(new HandlerWorker(inputChannel, outputChannel)));
+            Thread thread = new Thread(new HandlerWorker(inputChannel, outputChannel));
+            thread.setDaemon(false);
+            workers.add(thread);
         }
     }
 }

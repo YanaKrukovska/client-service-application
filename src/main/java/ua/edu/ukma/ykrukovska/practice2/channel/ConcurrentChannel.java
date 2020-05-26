@@ -16,4 +16,8 @@ public class ConcurrentChannel<T> implements Channel<T> {
     public T take() throws InterruptedException {
         return messages.take();
     }
+
+    public int size() {
+        return messages.size();
+    }
 }

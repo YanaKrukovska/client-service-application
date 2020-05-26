@@ -6,6 +6,8 @@ import ua.edu.ukma.ykrukovska.practice2.domain.DomainObject;
 import ua.edu.ukma.ykrukovska.practice2.messages.*;
 import ua.edu.ukma.ykrukovska.practice2.processor.*;
 
+import java.util.Arrays;
+
 public class DemoApplication {
 
 
@@ -35,5 +37,13 @@ public class DemoApplication {
         FakeMessageSender fakeMessageSender = new FakeMessageSender(encriptedChannel, null);
         fakeMessageSender.startProcessing();
 
+        WatchCat watchCat = new WatchCat();
+        watchCat.registerChannel(inbound);
+        watchCat.registerChannel(decipheredChannel);
+        watchCat.registerChannel(domainChannel);
+        watchCat.registerChannel(insecureResponsesChannel);
+        watchCat.registerChannel(encriptedChannel);
+        Thread monitorChannels = new Thread(watchCat);
+        monitorChannels.start();
     }
 }

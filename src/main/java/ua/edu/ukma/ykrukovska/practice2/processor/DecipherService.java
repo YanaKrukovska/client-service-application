@@ -14,7 +14,9 @@ public class DecipherService extends AbstractDataProcessingService<Message, Inse
     @Override
     protected void initWorkers() {
         for (int i = 0; i < workerAmount; i++) {
-            workers.add(new Thread(new DecipherWorker(inputChannel, outputChannel)));
+            Thread thread = new Thread(new DecipherWorker(inputChannel, outputChannel));
+            thread.setDaemon(false);
+            workers.add(thread);
         }
     }
 }

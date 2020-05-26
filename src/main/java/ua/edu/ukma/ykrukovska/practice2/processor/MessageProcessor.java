@@ -14,7 +14,9 @@ public class MessageProcessor extends AbstractDataProcessingService<InsecureMess
     @Override
     protected void initWorkers() {
         for (int i = 0; i < workerAmount; i++) {
-            workers.add(new Thread(new DomainWorker(inputChannel, outputChannel)));
+            Thread thread = new Thread(new DomainWorker(inputChannel, outputChannel));
+            thread.setDaemon(false);
+            workers.add(thread);
         }
     }
 }

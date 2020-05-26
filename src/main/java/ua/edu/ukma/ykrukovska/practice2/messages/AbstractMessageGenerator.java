@@ -4,7 +4,7 @@ import ua.edu.ukma.ykrukovska.practice2.channel.Channel;
 
 public abstract class AbstractMessageGenerator<T> {
     protected final Channel<T> outboundChannel;
-    private final static int DEFAULT_MESSAGE_AMOUNT = 100;
+    private final static int DEFAULT_MESSAGE_AMOUNT = 1;
     protected final int messageCount;
     protected final boolean infiniteGeneration;
     protected boolean stopGeneration = false;

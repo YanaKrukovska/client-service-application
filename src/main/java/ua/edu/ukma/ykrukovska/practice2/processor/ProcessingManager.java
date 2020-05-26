@@ -4,11 +4,13 @@ public class ProcessingManager {
     private static boolean processing = false;
 
     public static void stopProcessing() {
-        processing =false;
+        processing = false;
     }
+
     public static void startProcessing() {
-        processing =true;
+        processing = true;
     }
+
     public static boolean isProcessing() {
         return processing;
     }

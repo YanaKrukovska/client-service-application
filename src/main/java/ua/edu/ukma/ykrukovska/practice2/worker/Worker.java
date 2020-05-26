@@ -16,7 +16,7 @@ public abstract class Worker<I, O> implements Runnable {
         this.outboundChannel = outboundChannel;
     }
 
-
+    @Override
     public void run() {
         while (ProcessingManager.isProcessing()) {
             try {
@@ -31,7 +31,7 @@ public abstract class Worker<I, O> implements Runnable {
                 e.printStackTrace();
             }
         }
-
+        System.out.println("thread " + id + " finished");
     }
 
     protected abstract O process(I inputData);
