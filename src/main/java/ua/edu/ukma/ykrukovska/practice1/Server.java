@@ -35,8 +35,7 @@ public class Server {
         return byteBuffer.array();
     }
 
-    private byte[] convertPackageToBytes(Package pack) {
-
+    public byte[] convertPackageToBytes(Package pack) {
         byte[] encryptedMessage = convertMessageToByteArray(pack.getMsq());
 
         ByteBuffer byteBuffer = ByteBuffer.allocate(18 + encryptedMessage.length);

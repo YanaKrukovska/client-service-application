@@ -1,41 +1,44 @@
 package ua.edu.ukma.ykrukovska.practice3;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import ua.edu.ukma.ykrukovska.practice1.Package;
+import ua.edu.ukma.ykrukovska.practice1.Server;
+
+import java.io.*;
 import java.net.Socket;
 
 public class StoreClientTCP {
 
+    private static int clientId = 0;
     private Socket clientSocket;
     private PrintWriter out;
-    private BufferedReader in;
+    private DataOutputStream  outputStream;
 
     public void startConnection(String ip, int port) {
         try {
             clientSocket = new Socket(ip, port);
             out = new PrintWriter(clientSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            outputStream = new DataOutputStream (clientSocket.getOutputStream());
         } catch (IOException e) {
             System.out.println("Error when initializing connection");
         }
-
     }
 
-    public String sendMessage(String msg) {
+    public void sendPackage(Package packageToSend) {
         try {
-            out.println(msg);
-            return in.readLine();
-        } catch (Exception e) {
-            return null;
+            byte[] message = new Server(clientId++).convertPackageToBytes(packageToSend);
+            outputStream.writeInt(message.length);
+            outputStream.write(message);
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
     }
 
     public void stopConnection() {
         try {
-            in.close();
             out.close();
+            outputStream.close();
             clientSocket.close();
         } catch (IOException e) {
             System.out.println("error when closing");
@@ -43,5 +46,7 @@ public class StoreClientTCP {
 
     }
 
-
+    public int getClientId() {
+        return clientId;
+    }
 }

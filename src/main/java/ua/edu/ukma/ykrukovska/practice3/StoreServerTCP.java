@@ -1,9 +1,10 @@
 package ua.edu.ukma.ykrukovska.practice3;
 
-import java.io.BufferedReader;
+import ua.edu.ukma.ykrukovska.practice1.Client;
+import ua.edu.ukma.ykrukovska.practice1.Package;
+
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -14,16 +15,15 @@ public class StoreServerTCP {
     public void start(int port) {
         try {
             serverSocket = new ServerSocket(port);
-            while (true){
-                new StoreClientTCPHandler(serverSocket.accept()).start();
+            while (true) {
+                new StoreClientTCPWorker(serverSocket.accept()).start();
             }
-
         } catch (IOException e) {
             e.printStackTrace();
+            stop();
         } finally {
             stop();
         }
-
     }
 
     private void stop() {
@@ -35,30 +35,30 @@ public class StoreServerTCP {
 
     }
 
-    private static class StoreClientTCPHandler extends Thread {
+    private static class StoreClientTCPWorker extends Thread {
         private Socket clientSocket;
-        private PrintWriter out;
-        private BufferedReader in;
+        private DataInputStream inputStream;
+        private static int counter = 0;
 
-        public StoreClientTCPHandler(Socket socket) {
+        public StoreClientTCPWorker(Socket socket) {
             this.clientSocket = socket;
         }
 
         public void run() {
             try {
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    if (".".equals(inputLine)) {
-                        out.println("bye");
-                        break;
-                    }
-                    out.println(inputLine);
-                }
+                System.out.println("Started worker #" + counter++);
+                inputStream = new DataInputStream(clientSocket.getInputStream());
 
-                in.close();
-                out.close();
+                byte[] response = new byte[0];
+                int length = inputStream.readInt();
+                if (length > 0) {
+                    response = new byte[length];
+                    inputStream.readFully(response, 0, response.length);
+                }
+                Package receivedPackage = new Client().receivePackage(response);
+                System.out.println(receivedPackage.toString());
+
+                inputStream.close();
                 clientSocket.close();
 
             } catch (IOException e) {
@@ -66,11 +66,5 @@ public class StoreServerTCP {
             }
         }
     }
-
-    public static void main(String[] args) {
-        StoreServerTCP server = new StoreServerTCP();
-        server.start(5555);
-    }
-
 
 }

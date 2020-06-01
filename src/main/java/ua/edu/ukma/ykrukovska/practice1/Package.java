@@ -13,6 +13,10 @@ public class Package {
     private Message msq;
     private short crc16_2;
 
+    public void setSrc(byte src) {
+        this.src = src;
+    }
+
     public byte getMagic() {
         return magic;
     }
