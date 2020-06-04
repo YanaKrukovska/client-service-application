@@ -14,13 +14,13 @@ public class StorageImpl implements Storage {
     }
 
     @Override
-    public void addProduct(String productName, double amount) {
+    public void addProduct(String productName, int amount) {
         products.get(productName).setAmount(products.get(productName).getAmount() + amount);
 
     }
 
     @Override
-    public void withdrawProduct(String productName, double amount) {
+    public void withdrawProduct(String productName, int amount) {
         products.get(productName).setAmount(products.get(productName).getAmount() - amount);
     }
 

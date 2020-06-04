@@ -7,10 +7,10 @@ public class Product {
 
     private List<String> groups;
     private String name;
-    private double amount;
+    private int amount;
     private double price;
 
-    public Product(String name, LinkedList<String> group,  double amount, double price) {
+    public Product(String name, LinkedList<String> group,  int amount, double price) {
         this.groups = group;
         this.name = name;
         this.amount = amount;
@@ -33,11 +33,11 @@ public class Product {
         this.name = name;
     }
 
-    public double getAmount() {
+    public int getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(int amount) {
         this.amount = amount;
     }
 
