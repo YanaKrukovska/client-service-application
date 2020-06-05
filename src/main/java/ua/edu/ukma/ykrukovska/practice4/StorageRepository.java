@@ -55,7 +55,7 @@ public class StorageRepository {
     }
 
     public ResultSet findByProductName(String productName) {
-        PreparedStatement statement = null;
+        PreparedStatement statement;
         try {
             String query = "SELECT * FROM storage WHERE product_name=?";
             statement = connection.prepareStatement(query);
@@ -69,7 +69,7 @@ public class StorageRepository {
     }
 
     public ResultSet findByGroup(String groupName) {
-        PreparedStatement statement = null;
+        PreparedStatement statement;
         try {
             String query = "SELECT * FROM storage WHERE group_name=?";
             statement = connection.prepareStatement(query);
