@@ -1,11 +1,11 @@
 package ua.edu.ukma.ykrukovska.practice4;
-
 import ua.edu.ukma.ykrukovska.practice2.storage.Product;
 
 import java.sql.*;
 import java.util.List;
 
 public class StorageRepository {
+
     private static final String DB_URL = "jdbc:sqlite:C:/sqlite/storage.db";
 
     private Connection connection;
@@ -19,19 +19,129 @@ public class StorageRepository {
         }
     }
 
-    public void save(Product newProduct) {
-        String query = "INSERT INTO storage(product_name, group_name, amount, price) VALUES(?,?,?,?)";
+    private void saveGroup(String groupName) {
+        String query = "INSERT INTO groups(group_name) VALUES(?)";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, newProduct.getName());
-            statement.setString(2, newProduct.getGroups().get(0));
-            statement.setInt(3, newProduct.getAmount());
-            statement.setDouble(4, newProduct.getPrice());
+            statement.setString(1, groupName);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+    private void checkGroup(String groupName) {
+        String query = "SELECT * FROM groups WHERE group_name=?";
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, groupName);
+            ResultSet res = statement.executeQuery();
+            if (!res.next()) {
+                saveGroup(groupName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveGroups(List<String> groupNames) {
+        for (String groupName : groupNames) {
+            checkGroup(groupName);
+        }
+    }
+
+    public void updateProductGroups(String productName, List<String> newGroups) {
+
+        String query = "DELETE FROM product_groups WHERE product_id=?";
+
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, getProductId(productName));
+            statement.executeUpdate();
+            setGroupConnections(productName, newGroups);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private void setGroupConnections(String productName, List<String> groups) {
+        try {
+            addGroupsToProduct(getProductId(productName), groups);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void addGroupsToProduct(int productId, List<String> groups) {
+        for (String group : groups) {
+            checkGroup(group);
+            String query = "INSERT INTO product_groups(product_id, group_id) VALUES(?,?)";
+            try {
+                PreparedStatement statement = connection.prepareStatement(query);
+                statement.setInt(1, productId);
+                statement.setInt(2, findGroup(group).getInt("group_id"));
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    public ResultSet findGroup(String groupName) {
+        PreparedStatement statement;
+        try {
+            String query = "SELECT * FROM groups WHERE group_name=?";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, groupName);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ResultSet findByGroup(String groupName) {
+        PreparedStatement statement;
+        try {
+            String query = "SELECT * from storage where product_id IN (SELECT product_id from product_groups p join groups g on p.group_id = g.group_id where g.group_name = ?)";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, groupName);
+            return statement.executeQuery();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public int getProductId(String productName) throws SQLException {
+        ResultSet productDB = findByProductName(productName);
+        return productDB.getInt("product_id");
+    }
+
+
+    public void save(Product newProduct) {
+        String query = "INSERT INTO storage(product_name, amount, price) VALUES(?,?,?)";
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, newProduct.getName());
+            saveGroups(newProduct.getGroups());
+            statement.setInt(2, newProduct.getAmount());
+            statement.setDouble(3, newProduct.getPrice());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        setGroupConnections(newProduct.getName(), newProduct.getGroups());
+
+    }
+
 
     public void save(List<Product> productList) {
         for (Product product : productList) {
@@ -39,19 +149,20 @@ public class StorageRepository {
         }
     }
 
-    public void update(String productName, String newProductName, String groupName, int amount, double price) {
+
+    public void update(String productName, String newProductName, int amount, double price) {
         try {
-            String query = "UPDATE storage SET product_name=?, group_name=?, amount=?, price=? WHERE product_name=?";
+            String query = "UPDATE storage SET product_name=?, amount=?, price=? WHERE product_name=?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, newProductName);
-            statement.setString(2, groupName);
-            statement.setInt(3, amount);
-            statement.setDouble(4, price);
-            statement.setString(5, productName);
+            statement.setInt(2, amount);
+            statement.setDouble(3, price);
+            statement.setString(4, productName);
             statement.executeUpdate();
         } catch (SQLException e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
+
     }
 
     public ResultSet findByProductName(String productName) {
@@ -62,25 +173,12 @@ public class StorageRepository {
             statement.setString(1, productName);
             return statement.executeQuery();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 
         return null;
     }
 
-    public ResultSet findByGroup(String groupName) {
-        PreparedStatement statement;
-        try {
-            String query = "SELECT * FROM storage WHERE group_name=?";
-            statement = connection.prepareStatement(query);
-            statement.setString(1, groupName);
-            return statement.executeQuery();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return null;
-    }
 
     public void delete(String productName) {
         try {
@@ -89,9 +187,40 @@ public class StorageRepository {
             statement.setString(1, productName);
             statement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
+
+    public ResultSet listByAmount(int minAmount, int maxAmount) {
+        String query = "SELECT * from storage WHERE amount BETWEEN ? AND ?";
+
+        try {
+            return listByParameter(minAmount, maxAmount, query);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public ResultSet listByPrice(double minPrice, double maxPrice) {
+        String query = "SELECT * from storage WHERE price BETWEEN ? AND ?";
+
+        try {
+            return listByParameter(minPrice, maxPrice, query);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private ResultSet listByParameter(double min, double max, String query) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setDouble(1, min);
+        statement.setDouble(2, max);
+        return statement.executeQuery();
+    }
+
 
     public Connection getConnection() {
         return connection;

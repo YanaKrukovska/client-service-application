@@ -13,8 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 class StorageRepositoryTest {
-    static StorageRepository storageRepository;
-    static Connection dbConnection;
+    private static StorageRepository storageRepository;
+    private static Connection dbConnection;
 
     @BeforeAll
     static void setConnection() {
@@ -27,11 +27,21 @@ class StorageRepositoryTest {
         editTestTable("CREATE TABLE storage (\n" +
                 "  product_id   integer PRIMARY KEY,\n" +
                 "  product_name text    NOT NULL UNIQUE,\n" +
-                "  group_name   text    NOT NULL,\n" +
                 "  amount       integer NOT NULL,\n" +
                 "  price        real    NOT NULL\n" +
                 ")");
 
+        editTestTable("DROP TABLE groups");
+        editTestTable("CREATE TABLE groups (\n" +
+                "  group_id   integer PRIMARY KEY,\n" +
+                "  group_name text NOT NULL UNIQUE\n" +
+                ")");
+
+        editTestTable("DROP TABLE product_groups");
+        editTestTable("CREATE TABLE product_groups (\n" +
+                "  product_id   integer NOT NULL ,\n" +
+                "  group_id   integer NOT NULL\n" +
+                ")");
     }
 
     private static void editTestTable(String statement) {
@@ -102,10 +112,10 @@ class StorageRepositoryTest {
         double initialPrice = 10;
         storageRepository.save(new Product("butter", new LinkedList<>(Collections.singletonList(initialGroup)), initialAmount, initialPrice));
         String newGroup = "god food";
-        int newAmount = 1000;
+        int newAmount = 999;
         double newPrice = 20;
 
-        storageRepository.update("butter", "butter", newGroup, newAmount, newPrice);
+        storageRepository.update("butter", "butter", newAmount, newPrice);
 
         String query = "SELECT * FROM storage WHERE product_name=?";
         PreparedStatement statement;
@@ -119,9 +129,34 @@ class StorageRepositoryTest {
         }
 
         Assertions.assertEquals("butter", resultSet.getString("product_name"));
-        Assertions.assertEquals(newGroup, resultSet.getString("group_name"));
         Assertions.assertEquals(newAmount, resultSet.getInt("amount"));
         Assertions.assertEquals(newPrice, resultSet.getDouble("price"));
+    }
+
+
+    @Test
+    public void updateGroup() throws SQLException {
+
+        storageRepository.updateProductGroups("butter", Collections.singletonList("god food"));
+
+        ResultSet group = storageRepository.findGroup("god food");
+        int productId = storageRepository.getProductId("butter");
+
+        String query = "SELECT group_id FROM product_groups WHERE product_id=?";
+        PreparedStatement statement;
+        ResultSet resultSet = null;
+        try {
+            statement = dbConnection.prepareStatement(query);
+            statement.setInt(1, productId);
+            resultSet = statement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        int groupId = group.getInt("group_id");
+        Assertions.assertEquals(groupId, resultSet.getInt("group_id"));
+
     }
 
     @Test
@@ -131,7 +166,7 @@ class StorageRepositoryTest {
         int amount = 5;
         double price = 15000;
         storageRepository.save(new Product("fridge", new LinkedList<>(Collections.singletonList(group)), amount, price));
-        storageRepository.update("fridge", "lodówka", group, amount, price);
+        storageRepository.update("fridge", "lodówka", amount, price);
 
         String query = "SELECT * FROM storage WHERE product_name=?";
         PreparedStatement statement;
@@ -145,7 +180,6 @@ class StorageRepositoryTest {
         }
 
         Assertions.assertEquals("lodówka", resultSet.getString("product_name"));
-        Assertions.assertEquals(group, resultSet.getString("group_name"));
         Assertions.assertEquals(amount, resultSet.getInt("amount"));
         Assertions.assertEquals(price, resultSet.getDouble("price"));
     }
@@ -177,6 +211,51 @@ class StorageRepositoryTest {
         } catch (SQLException e) {
             //e.printStackTrace();
         }
+    }
+
+    @Test
+    public void listByAmount() {
+        List<Product> productList = new LinkedList<>(Arrays.asList(
+                new Product("buckwheat", new LinkedList<>(Collections.singletonList("food")), 10000, 20.0),
+                new Product("rice", new LinkedList<>(Collections.singletonList("food")), 5500, 30.50),
+                new Product("spaghetti", new LinkedList<>(Collections.singletonList("food")), 2000, 25.7),
+                new Product("nut", new LinkedList<>(Collections.singletonList("food")), 7000, 50.7)));
+
+        storageRepository.save(productList);
+        ResultSet resultSet = storageRepository.listByAmount(1000, 7000);
+        Assertions.assertEquals(3, getResultSetSize(resultSet));
+    }
+
+    @Test
+    public void listByPrice() {
+        List<Product> productList = new LinkedList<>(Arrays.asList(
+                new Product("cat toy", new LinkedList<>(Arrays.asList("toys", "kids")), 100, 200.0),
+                new Product("duck toy", new LinkedList<>(Arrays.asList("toys", "kids")), 200, 99.99),
+                new Product("darth vader toy", new LinkedList<>(Collections.singletonList("toys")), 50, 250.87),
+                new Product("ricardo milos toy", new LinkedList<>(Collections.singletonList("toys")), 1, 1999.9)));
+
+        storageRepository.save(productList);
+        ResultSet resultSet = storageRepository.listByPrice(99.99, 250.0);
+        Assertions.assertEquals(2, getResultSetSize(resultSet));
+    }
+
+    @Test
+    public void findByGroup() {
+        ResultSet resultSet = storageRepository.findByGroup("toys");
+        Assertions.assertEquals(4, getResultSetSize(resultSet));
+
+    }
+
+    private int getResultSetSize(ResultSet resultSet) {
+        int size = 0;
+        try {
+            while (resultSet.next()) {
+                size++;
+            }
+        } catch (SQLException e) {
+
+        }
+        return size;
     }
 
 
