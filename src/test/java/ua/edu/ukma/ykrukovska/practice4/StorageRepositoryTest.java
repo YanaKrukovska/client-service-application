@@ -139,7 +139,7 @@ class StorageRepositoryTest {
 
         storageRepository.updateProductGroups("butter", Collections.singletonList("god food"));
 
-        ResultSet group = storageRepository.findGroup("god food");
+        ResultSet group = storageRepository.getGroupRepository().findGroup("god food");
         int productId = storageRepository.getProductId("butter");
 
         String query = "SELECT group_id FROM product_groups WHERE product_id=?";
@@ -190,7 +190,7 @@ class StorageRepositoryTest {
         try {
             Assertions.assertEquals("whiskas", resultSet.getString("product_name"));
         } catch (SQLException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -209,7 +209,7 @@ class StorageRepositoryTest {
             resultSet = statement.executeQuery();
             Assertions.assertNull(resultSet.getString("product_name"));
         } catch (SQLException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -253,8 +253,7 @@ class StorageRepositoryTest {
                 size++;
             }
         } catch (SQLException e) {
-
-        }
+            e.printStackTrace();        }
         return size;
     }
 

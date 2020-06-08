@@ -9,80 +9,42 @@ public class StorageRepository {
     private static final String DB_URL = "jdbc:sqlite:C:/sqlite/storage.db";
 
     private Connection connection;
+    private GroupRepository groupRepository;
 
     public void connect() {
         connection = null;
         try {
             connection = DriverManager.getConnection(DB_URL);
+            groupRepository = new GroupRepository(connection);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private void saveGroup(String groupName) {
-        String query = "INSERT INTO groups(group_name) VALUES(?)";
-        try {
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, groupName);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void checkGroup(String groupName) {
-        String query = "SELECT * FROM groups WHERE group_name=?";
-        try {
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, groupName);
-            ResultSet res = statement.executeQuery();
-            if (!res.next()) {
-                saveGroup(groupName);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void saveGroups(List<String> groupNames) {
-        for (String groupName : groupNames) {
-            checkGroup(groupName);
-        }
-    }
 
     public void updateProductGroups(String productName, List<String> newGroups) {
 
         String query = "DELETE FROM product_groups WHERE product_id=?";
-
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, getProductId(productName));
             statement.executeUpdate();
-            setGroupConnections(productName, newGroups);
+            addGroupsToProduct(getProductId(productName), newGroups);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-
-    }
-
-    private void setGroupConnections(String productName, List<String> groups) {
-        try {
-            addGroupsToProduct(getProductId(productName), groups);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
 
     private void addGroupsToProduct(int productId, List<String> groups) {
         for (String group : groups) {
-            checkGroup(group);
+            groupRepository.checkGroup(group);
             String query = "INSERT INTO product_groups(product_id, group_id) VALUES(?,?)";
             try {
                 PreparedStatement statement = connection.prepareStatement(query);
                 statement.setInt(1, productId);
-                statement.setInt(2, findGroup(group).getInt("group_id"));
+                statement.setInt(2, groupRepository.findGroup(group).getInt("group_id"));
                 statement.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -91,18 +53,7 @@ public class StorageRepository {
 
     }
 
-    public ResultSet findGroup(String groupName) {
-        PreparedStatement statement;
-        try {
-            String query = "SELECT * FROM groups WHERE group_name=?";
-            statement = connection.prepareStatement(query);
-            statement.setString(1, groupName);
-            return statement.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+
 
     public ResultSet findByGroup(String groupName) {
         PreparedStatement statement;
@@ -130,15 +81,16 @@ public class StorageRepository {
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, newProduct.getName());
-            saveGroups(newProduct.getGroups());
+            groupRepository.saveGroups(newProduct.getGroups());
             statement.setInt(2, newProduct.getAmount());
             statement.setDouble(3, newProduct.getPrice());
             statement.executeUpdate();
+
+            addGroupsToProduct(getProductId(newProduct.getName()), newProduct.getGroups());
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        setGroupConnections(newProduct.getName(), newProduct.getGroups());
 
     }
 
@@ -226,6 +178,10 @@ public class StorageRepository {
         return connection;
     }
 
+
+    public GroupRepository getGroupRepository() {
+        return groupRepository;
+    }
 }
 
 
