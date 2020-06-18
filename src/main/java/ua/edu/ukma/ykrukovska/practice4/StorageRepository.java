@@ -1,4 +1,5 @@
 package ua.edu.ukma.ykrukovska.practice4;
+
 import ua.edu.ukma.ykrukovska.practice2.storage.Product;
 
 import java.sql.*;
@@ -52,7 +53,6 @@ public class StorageRepository {
         }
 
     }
-
 
 
     public ResultSet findByGroup(String groupName) {
@@ -181,6 +181,19 @@ public class StorageRepository {
 
     public GroupRepository getGroupRepository() {
         return groupRepository;
+    }
+
+    public ResultSet findProductById(long id) {
+        PreparedStatement statement;
+        try {
+            String query = "SELECT * FROM storage WHERE product_id=?";
+            statement = connection.prepareStatement(query);
+            statement.setLong(1, id);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
 

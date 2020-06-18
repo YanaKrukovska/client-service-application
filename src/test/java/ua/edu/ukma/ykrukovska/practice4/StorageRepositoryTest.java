@@ -243,7 +243,12 @@ class StorageRepositoryTest {
     public void findByGroup() {
         ResultSet resultSet = storageRepository.findByGroup("toys");
         Assertions.assertEquals(4, getResultSetSize(resultSet));
+    }
 
+    @Test
+    public void findProductById() throws SQLException {
+      ResultSet resultSet = storageRepository.findProductById(1);
+       Assertions.assertEquals("butter", resultSet.getString("product_name"));
     }
 
     private int getResultSetSize(ResultSet resultSet) {
