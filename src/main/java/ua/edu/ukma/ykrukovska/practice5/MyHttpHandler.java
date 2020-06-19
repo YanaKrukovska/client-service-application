@@ -16,7 +16,6 @@ public class MyHttpHandler implements HttpHandler {
 
     private StorageRepository storageRepository = new StorageRepository();
 
-
     @Override
     public void handle(HttpExchange response) throws IOException {
 
@@ -146,19 +145,7 @@ public class MyHttpHandler implements HttpHandler {
         long productId = Long.parseLong(path[path.length - 1]);
         ResultSet productResult = storageRepository.findProductById(productId);
         ResultSet productGroups = storageRepository.findAllGroupsOfProduct(productId);
-
-
-        LinkedList<String> groups = new LinkedList<>();
-        try {
-            do {
-                groups.add(storageRepository.getGroupRepository().findGroupById(Long.parseLong(productGroups.getString("product_id"))).getString("group_name"));
-                productGroups.next();
-
-            } while (productGroups.next());
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        LinkedList<String> groups = findGroupsOfProduct(productGroups);
 
 
         Product product = null;
@@ -166,7 +153,6 @@ public class MyHttpHandler implements HttpHandler {
 
             product = new Product(productResult.getString("product_name"), groups,
                     productResult.getInt("amount"), productResult.getDouble("price"));
-
         } catch (
                 SQLException e) {
             response.sendResponseHeaders(HttpServletResponse.SC_NOT_FOUND, -1);
@@ -186,6 +172,20 @@ public class MyHttpHandler implements HttpHandler {
         outputStream.write(goodsResponse.getBytes());
         outputStream.flush();
         outputStream.close();
+    }
+
+    private LinkedList<String> findGroupsOfProduct(ResultSet productGroups) {
+        LinkedList<String> groups = new LinkedList<>();
+        try {
+            do {
+                groups.add(storageRepository.getGroupRepository().findGroupById(Long.parseLong(productGroups.getString("group_id"))).getString("group_name"));
+                productGroups.next();
+            } while (productGroups.next());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return groups;
     }
 
     private void doGetLogin(HttpExchange httpExchange) throws IOException {
