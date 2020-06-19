@@ -10,7 +10,10 @@ public class Product {
     private int amount;
     private double price;
 
-    public Product(String name, LinkedList<String> group,  int amount, double price) {
+    public Product() {
+    }
+
+    public Product(String name, LinkedList<String> group, int amount, double price) {
         this.groups = group;
         this.name = name;
         this.amount = amount;
@@ -47,5 +50,17 @@ public class Product {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    @Override
+    public String toString() {
+    StringBuilder groupString = new StringBuilder();
+        for (String group : groups) {
+            groupString.append(group).append(", ");
+        }
+        return "Product: " + "groups = " + groupString +
+                "name = '" + name + '\'' +
+                ", amount = " + amount +
+                ", price = " + price;
     }
 }

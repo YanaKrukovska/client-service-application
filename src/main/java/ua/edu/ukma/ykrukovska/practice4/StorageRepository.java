@@ -22,6 +22,19 @@ public class StorageRepository {
         }
     }
 
+    public ResultSet findAllGroupsOfProduct(long productId) {
+        PreparedStatement statement;
+        try {
+            String query = "SELECT * from product_groups where product_id = ?";
+            statement = connection.prepareStatement(query);
+            statement.setLong(1, productId);
+            return statement.executeQuery();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public void updateProductGroups(String productName, List<String> newGroups) {
 
@@ -36,7 +49,6 @@ public class StorageRepository {
         }
 
     }
-
 
     private void addGroupsToProduct(int productId, List<String> groups) {
         for (String group : groups) {
@@ -110,6 +122,20 @@ public class StorageRepository {
             statement.setInt(2, amount);
             statement.setDouble(3, price);
             statement.setString(4, productName);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void update(long id, Product product) {
+        try {
+            String query = "UPDATE storage SET product_name=?, amount=?, price=? WHERE product_id=?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, product.getName());
+            statement.setInt(2, product.getAmount());
+            statement.setDouble(3, product.getPrice());
+            statement.setLong(4, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -194,6 +220,19 @@ public class StorageRepository {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public boolean validateParameters(Product product) {
+        if (product.getName().equals("") || product.getName() == null) {
+            return false;
+        }
+        if (product.getAmount() < 0) {
+            return false;
+        }
+        if (product.getPrice() < 0) {
+            return false;
+        }
+        return true;
     }
 }
 

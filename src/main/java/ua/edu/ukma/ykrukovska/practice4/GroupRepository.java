@@ -57,4 +57,17 @@ public class GroupRepository {
         return null;
     }
 
+    public ResultSet findGroupById(long groupId) {
+        PreparedStatement statement;
+        try {
+            String query = "SELECT * FROM groups WHERE group_id=?";
+            statement = connection.prepareStatement(query);
+            statement.setLong(1, groupId);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

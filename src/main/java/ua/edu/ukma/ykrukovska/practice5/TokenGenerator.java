@@ -39,7 +39,7 @@ public class TokenGenerator {
         return builder.compact();
     }
 
-    private void parseJWT(String jwt) {
+    public static void parseJWT(String jwt) {
 
         Claims claims = Jwts.parser()
                 .setSigningKey(DatatypeConverter.parseBase64Binary(SECRET_KEY))
